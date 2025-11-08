@@ -1,0 +1,27 @@
+@"
+# 🐍 Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 🔑 Secrets
+.env
+
+# 💾 Databases
+*.sqlite3
+
+# ⚙️ IDE & Editor files
+.vscode/
+.idea/
+
+# 🖥️ Node / Frontend
+node_modules/
+.next/
+dist/
+build/
+
+# 📦 Logs
+*.log
+"@ > .gitignore
