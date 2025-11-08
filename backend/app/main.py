@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from app.core.database import SessionLocal
-from app.routers import symptom_router
+from app.routers import symptom_router, medication_router
 from sqlalchemy import text
 
 app = FastAPI(title="MyHealthSense")
 
 app.include_router(symptom_router.router)
+app.include_router(medication_router.router)
 
 @app.get("/")
 def root():
