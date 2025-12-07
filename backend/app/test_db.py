@@ -1,17 +1,14 @@
-from sqlalchemy import create_engine, text
-from app.core.config import settings
+import asyncio
+from sqlalchemy import text
+from app.core.database import engine
 
-print("🔍 Testing database connection...")
-print(f"Using DATABASE_URL: {settings.DATABASE_URL}")
+async def test_connection():
+    print("🔍 Testing ASYNC DB connection...")
+    try:
+        async with engine.connect() as conn:
+            result = await conn.execute(text("SELECT 1"))
+            print("✅ Connected successfully!", result.scalar())
+    except Exception as e:
+        print("❌ Connection failed:", e)
 
-# create SQLAlchemy engine
-engine = create_engine(settings.DATABASE_URL)
-
-try:
-    # try to connect
-    with engine.connect() as conn:
-        conn.execute(text("SELECT 1"))
-        print("✅ Connected successfully to the PostgreSQL database!")
-except Exception as e:
-    print("❌ Database connection failed!")
-    print("Error details:", e)
+asyncio.run(test_connection())
