@@ -7,13 +7,18 @@ from app.core.database import get_db
 from app.models.medication_model import Medication
 from app.schemas.medication_schema import MedicationCreate, MedicationResponse
 from app.utils.logger import logger
+from app.core.dependencies import get_current_user
+from app.models.user_model import User
 
 router = APIRouter(prefix="/medications", tags=["Medications"])
 
 # POST → Add new medication
 @router.post("/", response_model=MedicationResponse)
-async def create_medication(medication: MedicationCreate, db: AsyncSession = Depends(get_db)):
-    new_med = Medication(**medication.dict())
+async def create_medication(medication: MedicationCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    new_med = Medication(
+        user_id=current_user.id,
+        **medication.dict()
+    )
     db.add(new_med)
     await db.commit()
     await db.refresh(new_med)
@@ -23,10 +28,12 @@ async def create_medication(medication: MedicationCreate, db: AsyncSession = Dep
 
 
 # GET → Fetch all medications
-@router.get("/", response_model=List[MedicationResponse])
-async def get_medications(db: AsyncSession = Depends(get_db)):
+@router.get("/me", response_model=List[MedicationResponse])
+async def get_my_medications(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(
-        select(Medication).order_by(Medication.created_at.desc())
+        select(Medication)
+        .where(Medication.user_id == current_user.id)
+        .order_by(Medication.created_at.desc())
     )
     meds = result.scalars().all()
 
@@ -36,9 +43,12 @@ async def get_medications(db: AsyncSession = Depends(get_db)):
 
 # PUT → Update medication by ID
 @router.put("/{med_id}", response_model=MedicationResponse)
-async def update_medication(med_id: int, updated_data: MedicationCreate, db: AsyncSession = Depends(get_db)):
+async def update_medication(med_id: int, updated_data: MedicationCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(
-        select(Medication).filter(Medication.id == med_id)
+        select(Medication).where(
+            Medication.id == med_id,
+            Medication.user_id == current_user.id
+        )
     )
     med = result.scalar_one_or_none()
 
@@ -58,9 +68,12 @@ async def update_medication(med_id: int, updated_data: MedicationCreate, db: Asy
 
 # DELETE → Remove medication by ID
 @router.delete("/{med_id}")
-async def delete_medication(med_id: int, db: AsyncSession = Depends(get_db)):
+async def delete_medication(med_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = await db.execute(
-        select(Medication).filter(Medication.id == med_id)
+        select(Medication).where(
+            Medication.id == med_id,
+            Medication.user_id == current_user.id
+        )
     )
     med = result.scalar_one_or_none()
 

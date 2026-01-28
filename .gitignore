@@ -1,16 +1,16 @@
 @"
 # 🐍 Python
 venv/
-__pycache__/
+__pycache__/ 
 *.pyc
 *.pyo
 *.pyd
 
 # 🔑 Secrets
-.env
+.env 
 
 # 💾 Databases
-*.sqlite3
+*.sqlite3 
 
 # ⚙️ IDE & Editor files
 .vscode/
